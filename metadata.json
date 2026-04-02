@@ -1,0 +1,5 @@
+{
+  "name": "The Story System",
+  "description": "A non-linear, interactive storytelling developer portfolio built with Next-style architecture, Framer Motion, and Zustand.",
+  "requestFramePermissions": []
+}
