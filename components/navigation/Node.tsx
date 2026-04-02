@@ -1,6 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { motion, useTransform, MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { nodeVariants } from "@/lib/animation";
 import type { SceneKey } from "@/features/story/story.types";
@@ -8,14 +6,14 @@ import { SCENES } from "@/features/story/story.config";
 
 interface NodeProps {
   sceneKey: SceneKey;
-  x: number; // percentage 0-100 or virtual px
-  y: number; // percentage 0-100 or virtual px
+  x: number; 
+  y: number; 
   isActive: boolean;
   isHovered: boolean;
   onClick: (key: SceneKey) => void;
   onHover: (key: SceneKey | null) => void;
   index: number;
-  cameraX?: number;
+  cameraX: MotionValue<number>; // Changed to MotionValue
   useVirtualCoords?: boolean;
 }
 
@@ -28,27 +26,35 @@ export function Node({
   onClick,
   onHover,
   index,
-  cameraX = 0,
+  cameraX,
   useVirtualCoords = false,
 }: NodeProps) {
   const scene = SCENES[sceneKey];
 
-  // Dynamic hierarchy sizing & depth system
-  const dist = Math.abs(x - cameraX);
-  const normalizedDist = Math.min(dist / 1200, 1); // Max depth effect at 1200px
+  // Perspective rules - Driven by cameraX motion value (No re-renders!)
+  // We use cameraX (focus point) to calculate distance from this node's x
+  const scale = useTransform(
+    cameraX, 
+    [x - 1200, x, x + 1200], 
+    [0.7, sceneKey === "systems" ? 1.3 : 1.1, 0.7]
+  );
   
+  const opacity = useTransform(
+    cameraX, 
+    [x - 1200, x, x + 1200], 
+    [0.3, 1, 0.3]
+  );
+
+  const blurValue = useTransform(
+    cameraX,
+    [x - 800, x, x + 800],
+    [2, 0, 2]
+  );
+
+  const pulseDuration = sceneKey === "systems" ? 3 : 2;
   const isPeak = sceneKey === "systems";
   const isVision = scene.type === "vision";
-  const isPrimary = scene.type === "primary";
-  
-  // Perspective rules
-  const baseScale = isVision ? 1.4 : isPeak ? 1.2 : isPrimary ? 1 : 0.9;
-  const targetScale = baseScale * (1.2 - (normalizedDist * 0.4));
-  const targetOpacity = 1 - (normalizedDist * 0.6);
-  const targetBlur = normalizedDist * 1.5; // Very subtle blur at distance
-
-  const pulseDuration = isPeak ? 3 : 2;
-  const size = isPeak ? "w-24 h-24" : isPrimary ? "w-20 h-20" : "w-16 h-16";
+  const size = isPeak ? "w-24 h-24" : "w-20 h-20";
 
   const posStyle = useVirtualCoords 
     ? { left: `${x}px`, top: `${y}%` } 
@@ -57,14 +63,14 @@ export function Node({
   return (
     <motion.div
       className="absolute -translate-x-1/2 -translate-y-1/2"
-      style={posStyle}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ 
-        opacity: targetOpacity, 
-        scale: targetScale,
-        y: 0,
-        filter: `blur(${targetBlur}px)`
+      style={{ 
+        ...posStyle,
+        scale,
+        opacity,
+        filter: useTransform(blurValue, (v) => `blur(${v}px)`)
       }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }} // Ensure opacity 1 is reachable on mount
       transition={{ 
         type: "spring",
         stiffness: 120,
@@ -135,7 +141,7 @@ export function Node({
       )}
 
       {/* Tooltip Preview (Only near focus) */}
-      {isHovered && normalizedDist < 0.3 && (
+      {isHovered && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}

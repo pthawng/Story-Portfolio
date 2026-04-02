@@ -28,6 +28,8 @@ export interface StoryState {
   isTransitioning: boolean;
   /** Horizontal focus point for the story map (px/coordinate) */
   cameraX: number;
+  /** The node currently centered in the viewport */
+  focusedNode: SceneKey;
 }
 
 export interface StoryActions {
@@ -35,6 +37,7 @@ export interface StoryActions {
   goBack: () => void;
   setTransitioning: (value: boolean) => void;
   setCameraX: (x: number) => void;
+  setFocusedNode: (key: SceneKey) => void;
 }
 
 export type StoryStore = StoryState & StoryActions;

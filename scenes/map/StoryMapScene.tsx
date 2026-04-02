@@ -11,7 +11,7 @@ import { staggerContainer, staggerItem } from "@/lib/animation";
 import type { SceneKey } from "@/features/story/story.types";
 
 export function StoryMapScene() {
-  const { currentScene, setScene, history, goBack } = useStoryStore();
+  const { currentScene, setScene, history, goBack, focusedNode } = useStoryStore();
   const { hoveredNode, setHoveredNode } = useNavigationStore();
 
   const handleNodeClick = (key: SceneKey) => {
@@ -20,7 +20,8 @@ export function StoryMapScene() {
     }
   };
 
-  const currentChapter = SCENES[currentScene].chapterNumber || 0;
+  // Fallback to 1 if focusedNode doesn't have a chapter (e.g. initial mount)
+  const currentChapter = SCENES[focusedNode].chapterNumber || 1;
   const hoveredScene = hoveredNode ? SCENES[hoveredNode] : null;
 
   return (

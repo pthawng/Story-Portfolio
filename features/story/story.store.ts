@@ -12,7 +12,8 @@ export const useStoryStore = create<StoryStore>()(
       currentScene: INITIAL_SCENE,
       history: [],
       isTransitioning: false,
-      cameraX: 0, // Systems Thinking is at 0 by default
+      cameraX: 0,
+      focusedNode: "beginning",
 
       // ── Actions ────────────────────────────────────────────
       setScene: (scene: SceneKey) => {
@@ -23,6 +24,7 @@ export const useStoryStore = create<StoryStore>()(
           {
             history: [...history, currentScene],
             currentScene: scene,
+            focusedNode: scene, // Set focus when transitioning directly
           },
           false,
           "setScene"
@@ -31,6 +33,10 @@ export const useStoryStore = create<StoryStore>()(
 
       setCameraX: (x: number) => {
         set({ cameraX: x }, false, "setCameraX");
+      },
+
+      setFocusedNode: (key: SceneKey) => {
+        set({ focusedNode: key }, false, "setFocusedNode");
       },
 
       goBack: () => {

@@ -90,6 +90,35 @@ export const SCENES: Record<SceneKey, SceneMetadata> = {
   },
 };
 
+/** Navigation layout (Virtual pixels from center) */
+export interface LayoutPosition {
+  x: number;
+  y: number;
+}
+
+export const NODE_POSITIONS: Record<SceneKey, LayoutPosition> = {
+  intro:       { x: -1800, y: 10 },
+  map:         { x: -1800, y: 10 },
+  beginning:   { x: -1800, y: 45 },
+  struggles:   { x: -1200, y: 56 },
+  breakthrough:{ x: -600, y: 48 },
+  systems:     { x: 0, y: 50 },
+  projects:    { x: 600, y: 45 },
+  playground:  { x: 1200, y: 56 },
+  proof:       { x: 1800, y: 48 },
+  vision:      { x: 2600, y: 42 },
+};
+
+export const EDGES = [
+  { from: "beginning",   to: "struggles" },
+  { from: "struggles",   to: "breakthrough" },
+  { from: "breakthrough", to: "systems" },
+  { from: "systems",      to: "projects" },
+  { from: "projects",     to: "playground" },
+  { from: "playground",   to: "proof" },
+  { from: "proof",        to: "vision" },
+];
+
 /** Ordered chapter list for the map (excludes intro/map themselves) */
 export const CHAPTER_ORDER: SceneKey[] = [
   "beginning",
